@@ -10,8 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^3.10.0",
     "apollo-datasource-rest": "^3.5.1",
     "axios": "^0.26.0",
     "nodemon": "^2.0.15"
+  },
+  "devDependencies": {
+    "prisma": "^3.10.0"
   }
 }

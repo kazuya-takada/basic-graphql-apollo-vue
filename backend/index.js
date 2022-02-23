@@ -1,21 +1,14 @@
 const { ApolloServer, gql } = require('apollo-server');
 const { default: axios } = require('axios');
 const { RESTDataSource } = require('apollo-datasource-rest');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
 
 class jsonPlaceAPI extends RESTDataSource {
   constructor() {
     super()
     this.baseURL = 'https://jsonplaceholder.typicode.com/'
-  }
-
-  async getUsers() {
-    const data = await this.get('/users')
-    return data
-  }
-
-  async getUser(id) {
-    const data = await this.get(`/users/${id}`)
-    return data
   }
 
   async getPosts() {
@@ -45,19 +38,46 @@ const typeDefs = gql`
     user(id: ID!): User
     posts: [Post]
   }
+
+  type Mutation {
+    createUser(name: String!, email: String!): User
+    updateUser(id: Int!, name: String!): User
+  }
 `
 
 
 const resolvers = {
   Query: {
-    users: async (_, __, { dataSources }) => {
-      return dataSources.jsonPlaceAPI.getUsers()
-    }, 
-    user: async (_, args, { dataSources }) => {
-      return dataSources.jsonPlaceAPI.getUser(args.id)
+    users: () => {
+      return prisma.user.findMany();
+    },
+    user: (_, args) => {
+      return prisma.user.findUnique({
+        where: { id: Number(args.id) }
+      })
     },
     posts: async (_, __, { dataSources } ) => {
       return dataSources.jsonPlaceAPI.getPosts()
+    }
+  },
+  Mutation: {
+    createUser: (_, args) => {
+      return prisma.user.create({
+        data: {
+          name: args.name,
+          email: args.email
+        }
+      })
+    },
+    updateUser: (_, args) => {
+      return prisma.user.update({
+        where: {
+          id: args.id
+        },
+        data: {
+          name: args.name
+        }
+      })
     }
   },
   User: {
