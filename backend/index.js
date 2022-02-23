@@ -42,6 +42,7 @@ const typeDefs = gql`
   type Mutation {
     createUser(name: String!, email: String!): User
     updateUser(id: Int!, name: String!): User
+    deleteUser(id: Int!): User
   }
 `
 
@@ -77,6 +78,11 @@ const resolvers = {
         data: {
           name: args.name
         }
+      })
+    },
+    deleteUser: (_, args) => {
+      return prisma.user.delete({
+        where: { id: args.id }
       })
     }
   },
